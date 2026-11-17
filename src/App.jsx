@@ -10,14 +10,22 @@ export default function App() {
         Coded by{" "}
         <a href="https://github.com/repos" target="_blank" rel="noreferrer">
           Milena
-        </a>{" "}
-        ·{" "}
+        </a>
+        <span className="footer-separator">·</span>
         <a
           href="https://github.com/MillieBea/weather-app-react"
           target="_blank"
           rel="noreferrer"
         >
-          Open-source code
+          Open-sourced on Github
+        </a>
+        <span className="footer-separator">·</span>
+        <a
+          href="https://app-around.netlify.app/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Hosted on Netlify
         </a>
       </footer>
     </div>

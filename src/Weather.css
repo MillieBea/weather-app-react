@@ -123,6 +123,13 @@
   opacity: 1;
 }
 
+.footer-separator {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 8px;
+  vertical-align: middle;
+}
+
 @media (max-width: 500px) {
   .weather-details {
     gap: 10px;

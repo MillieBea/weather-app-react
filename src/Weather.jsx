@@ -7,19 +7,6 @@ import "./Weather.css";
 import Temperature from "./Temperature";
 import manifest from "@meteocons/svg/manifest.json";
 
-const allIcons = manifest.categories.flatMap((category) => category.icons);
-
-console.log(
-  "Weather icon options:",
-  JSON.stringify(
-    allIcons
-      .filter((icon) => /clear|cloud|rain|storm|snow|fog|mist/i.test(icon.slug))
-      .map((icon) => icon.slug),
-    null,
-    2,
-  ),
-);
-
 export default function Weather() {
   const [city, setCity] = useState("London");
 
