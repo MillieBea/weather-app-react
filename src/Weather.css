@@ -74,6 +74,12 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
+.date-separator {
+  font-size: 1.2em;
+  font-weight: 300;
+  margin: 0 3px;
+}
+
 @media (max-width: 500px) {
   .weather-details {
     gap: 10px;

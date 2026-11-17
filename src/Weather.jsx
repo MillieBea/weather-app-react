@@ -1,39 +1,86 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import FormattedDate from "./FormattedDate";
 import { PuffLoader } from "react-spinners";
+import WeatherIcon from "./WeatherIcon";
 import "./Weather.css";
+import manifest from "@meteocons/svg/manifest.json";
+
+const allIcons = manifest.categories.flatMap((category) => category.icons);
+
+console.log(
+  "Weather icon options:",
+  JSON.stringify(
+    allIcons
+      .filter((icon) => /clear|cloud|rain|storm|snow|fog|mist/i.test(icon.slug))
+      .map((icon) => icon.slug),
+    null,
+    2,
+  ),
+);
 
 export default function Weather() {
   const [city, setCity] = useState("London");
-  const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  function searchWeather(cityName) {
-    setLoading(true);
-    setError("");
+  const [weatherData, setWeatherData] = useState({
+    ready: false,
+    loading: false,
+    error: null,
+  });
 
-    const url = `https://api.shecodes.io/weather/v1/current?query=${encodeURIComponent(cityName)}&key=oa123466c5f9312d2cba18f04t3ef25d`;
+  const searchWeather = useCallback((cityName) => {
+    setWeatherData((previousData) => ({
+      ...previousData,
+      loading: true,
+      error: null,
+    }));
+
+    const apiKey = import.meta.env.VITE_SHECODES_API_KEY;
+
+    const url = `https://api.shecodes.io/weather/v1/current?query=${encodeURIComponent(cityName)}&key=${apiKey}`;
 
     axios
       .get(url)
       .then((response) => {
-        setWeather(response.data);
-        setLoading(false);
+        const data = response.data;
+        console.log("Weather icon:", data.condition.icon);
+        console.log("Weather description:", data.condition.description);
+
+        const timezoneUrl = `https://hourora.app/api/v1/lookup?lat=${data.coordinates.latitude}&lng=${data.coordinates.longitude}`;
+
+        return axios.get(timezoneUrl).then((timezoneResponse) => {
+          setWeatherData({
+            ready: true,
+            loading: false,
+            error: null,
+            city: data.city,
+            date: new Date(data.time * 1000),
+            timeZone: timezoneResponse.data.zone,
+            temperature: data.temperature.current,
+            humidity: data.temperature.humidity,
+            description: data.condition.description,
+            icon: data.condition.icon,
+            wind: data.wind.speed,
+          });
+        });
       })
       .catch((error) => {
         console.error(
           "Weather API error:",
           error.response?.data || error.message,
         );
-        setError("Sorry, we couldn't find that city. Please try again.");
-        setLoading(false);
+
+        setWeatherData((previousData) => ({
+          ...previousData,
+          loading: false,
+          error: "Sorry, we couldn't find that city. Please try again.",
+        }));
       });
-  }
+  }, []);
 
   useEffect(() => {
     searchWeather("London");
-  }, []);
+  }, [searchWeather]);
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -59,45 +106,41 @@ export default function Weather() {
           </div>
         </form>
 
-        {loading && (
+        {weatherData.loading && (
           <div className="loader">
             <PuffLoader color="#000000" size={60} speedMultiplier={0.7} />
           </div>
         )}
 
-        {error && <p className="text-danger">{error}</p>}
+        {weatherData.error && (
+          <p className="text-danger">{weatherData.error}</p>
+        )}
 
-        {weather && !loading && (
+        {weatherData.ready && !weatherData.loading && (
           <div className="weather-info">
             <div className="location-info">
-              <h2>{weather.city}</h2>
+              <h2>{weatherData.city}</h2>
 
-              <p className="date-time">
-                {new Date().toLocaleDateString("en-GB", {
-                  weekday: "long",
-                })}{" "}
-                |{" "}
-                {new Date().toLocaleTimeString("en-GB", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
+              <div className="date-time">
+                <FormattedDate
+                  date={weatherData.date}
+                  timeZone={weatherData.timeZone}
+                />
+              </div>
 
-              <p className="description">{weather.condition.description}</p>
+              <p className="description">{weatherData.description}</p>
             </div>
 
             <div className="weather-details">
               <div className="temperature">
-                <img
-                  src={weather.condition.icon_url}
-                  alt={weather.condition.description}
-                />
-                <h1>{Math.round(weather.temperature.current)}°C</h1>
+                <WeatherIcon icon={weatherData.icon} size={150} />
+
+                <h1>{Math.round(weatherData.temperature)}°C</h1>
               </div>
 
               <div className="additional-info">
-                <p>Humidity: {weather.temperature.humidity}%</p>
-                <p>Wind: {weather.wind.speed} km/h</p>
+                <p>Humidity: {weatherData.humidity}%</p>
+                <p>Wind: {weatherData.wind} km/h</p>
               </div>
             </div>
           </div>

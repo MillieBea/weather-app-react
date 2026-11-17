@@ -12,7 +12,11 @@ export default function App() {
           Milena
         </a>{" "}
         ·{" "}
-        <a href="" target="_blank" rel="noreferrer">
+        <a
+          href="https://github.com/MillieBea/weather-app-react"
+          target="_blank"
+          rel="noreferrer"
+        >
           Open-source code
         </a>
       </footer>
