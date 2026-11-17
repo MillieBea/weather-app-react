@@ -4,6 +4,7 @@ import FormattedDate from "./FormattedDate";
 import { PuffLoader } from "react-spinners";
 import WeatherIcon from "./WeatherIcon";
 import "./Weather.css";
+import Temperature from "./Temperature";
 import manifest from "@meteocons/svg/manifest.json";
 
 const allIcons = manifest.categories.flatMap((category) => category.icons);
@@ -135,7 +136,7 @@ export default function Weather() {
               <div className="temperature">
                 <WeatherIcon icon={weatherData.icon} size={150} />
 
-                <h1>{Math.round(weatherData.temperature)}°C</h1>
+                <Temperature celsius={weatherData.temperature} />
               </div>
 
               <div className="additional-info">
