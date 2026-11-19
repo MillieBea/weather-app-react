@@ -20,3 +20,10 @@
   color: #888888;
   text-decoration: underline;
 }
+
+.footer-separator {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 8px;
+  vertical-align: middle;
+}

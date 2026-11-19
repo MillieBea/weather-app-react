@@ -3,9 +3,22 @@ import axios from "axios";
 import FormattedDate from "./FormattedDate";
 import { PuffLoader } from "react-spinners";
 import WeatherIcon from "./WeatherIcon";
-import "./Weather.css";
+import Forecast from "./Forecast";
 import Temperature from "./Temperature";
-import manifest from "@meteocons/svg/manifest.json";
+import LocalClock from "./LocalClock";
+import "./Weather.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import {
+  faLocationDot,
+  faTemperatureHalf,
+  faDroplet,
+  faWind,
+  faGaugeHigh,
+  faMagnifyingGlass,
+  faLocationCrosshairs,
+  faCalendarDays,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function Weather() {
   const [city, setCity] = useState("London");
@@ -27,10 +40,14 @@ export default function Weather() {
 
     const url = `https://api.shecodes.io/weather/v1/current?query=${encodeURIComponent(cityName)}&key=${apiKey}`;
 
+    const forecastUrl = `https://api.shecodes.io/weather/v1/forecast?query=${encodeURIComponent(cityName)}&key=${apiKey}`;
+
     axios
-      .get(url)
-      .then((response) => {
+      .all([axios.get(url), axios.get(forecastUrl)])
+      .then(([response, forecastResponse]) => {
         const data = response.data;
+        const forecastData = forecastResponse.data;
+
         console.log("Weather icon:", data.condition.icon);
         console.log("Weather description:", data.condition.description);
 
@@ -42,13 +59,17 @@ export default function Weather() {
             loading: false,
             error: null,
             city: data.city,
+            country: data.country,
             date: new Date(data.time * 1000),
             timeZone: timezoneResponse.data.zone,
             temperature: data.temperature.current,
+            feelsLike: data.temperature.feels_like,
             humidity: data.temperature.humidity,
+            pressure: data.temperature.pressure,
             description: data.condition.description,
             icon: data.condition.icon,
             wind: data.wind.speed,
+            forecast: forecastData.daily,
           });
         });
       })
@@ -74,24 +95,120 @@ export default function Weather() {
     event.preventDefault();
     searchWeather(city);
   }
+  function handleLocationClick() {
+    if (!navigator.geolocation) {
+      setWeatherData((previousData) => ({
+        ...previousData,
+        error: "Your browser does not support location services.",
+      }));
+
+      return;
+    }
+
+    setWeatherData((previousData) => ({
+      ...previousData,
+      loading: true,
+      error: null,
+    }));
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        const reverseGeocodeUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
+
+        axios
+          .get(reverseGeocodeUrl)
+          .then((response) => {
+            const data = response.data;
+
+            const place = data.city || data.locality;
+            const country = data.countryName;
+
+            if (!place) {
+              throw new Error("Could not identify your nearest city.");
+            }
+
+            const locationQuery = country ? `${place}, ${country}` : place;
+
+            searchWeather(locationQuery);
+          })
+          .catch((error) => {
+            console.error("Location lookup error:", error);
+
+            setWeatherData((previousData) => ({
+              ...previousData,
+              loading: false,
+              error:
+                "Sorry, we couldn't identify your current location. Please try again.",
+            }));
+          });
+      },
+
+      (error) => {
+        let message = "Unable to retrieve your location. Please try again.";
+
+        if (error.code === 1) {
+          message =
+            "Location permission was denied. Please allow location access in your browser settings.";
+        } else if (error.code === 2) {
+          message = "Your location is currently unavailable.";
+        } else if (error.code === 3) {
+          message = "Location request timed out. Please try again.";
+        }
+
+        setWeatherData((previousData) => ({
+          ...previousData,
+          loading: false,
+          error: message,
+        }));
+      },
+
+      {
+        enableHighAccuracy: false,
+        timeout: 60000,
+        maximumAge: 600000,
+      },
+    );
+  }
 
   return (
     <div className="container">
       <div className="weather-card">
-        <form onSubmit={handleSubmit}>
-          <div className="d-flex gap-2 mb-4">
+        <form onSubmit={handleSubmit} className="weather-search">
+          <div className="search-input-group">
+            <FontAwesomeIcon
+              icon={faMagnifyingGlass}
+              className="search-input-icon"
+            />
+
             <input
               type="text"
               className="form-control"
-              placeholder="Enter a city..."
+              placeholder="Search for a city..."
               value={city}
               onChange={(event) => setCity(event.target.value)}
             />
-
-            <button className="btn btn-primary" type="submit">
-              Search
-            </button>
           </div>
+
+          <button
+            className="search-button"
+            type="submit"
+            aria-label="Search city"
+          >
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
+          </button>
+
+          <button
+            className={`location-button ${weatherData.loading ? "locating" : ""}`}
+            type="button"
+            onClick={handleLocationClick}
+            aria-label="Use my current location"
+            title="Use my current location"
+          >
+            <FontAwesomeIcon icon={faLocationCrosshairs} />
+          </button>
         </form>
 
         {weatherData.loading && (
@@ -106,29 +223,89 @@ export default function Weather() {
 
         {weatherData.ready && !weatherData.loading && (
           <div className="weather-info">
-            <div className="location-info">
-              <h2>{weatherData.city}</h2>
+            <div className="current-weather-grid">
+              <div className="weather-panel date-panel">
+                <div className="date-time">
+                  <FormattedDate
+                    date={weatherData.date}
+                    timeZone={weatherData.timeZone}
+                  />
 
-              <div className="date-time">
-                <FormattedDate
-                  date={weatherData.date}
-                  timeZone={weatherData.timeZone}
-                />
+                  <div className="info-tile clock-tile">
+                    <LocalClock timeZone={weatherData.timeZone} />
+                  </div>
+                </div>
+
+                <p className="description">{weatherData.description}</p>
               </div>
 
-              <p className="description">{weatherData.description}</p>
+              <div className="weather-panel main-weather-panel">
+                <div className="location-tile">
+                  <FontAwesomeIcon icon={faLocationDot} />
+                  <div className="location-text">
+                    <h2>{weatherData.city}</h2>
+                    <p>{weatherData.country}</p>
+                  </div>
+                </div>
+
+                <div className="weather-main-content">
+                  <div className="temperature-tile">
+                    <Temperature celsius={weatherData.temperature} />
+                  </div>
+
+                  <div className="side-weather-icon">
+                    <WeatherIcon icon={weatherData.icon} size={160} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="weather-panel details-panel">
+                <div className="info-tile detail-tile">
+                  <FontAwesomeIcon icon={faTemperatureHalf} />
+                  <span>Feels like</span>
+                  <strong>{Math.round(weatherData.feelsLike)}°C</strong>
+                </div>
+
+                <div className="info-tile detail-tile">
+                  <FontAwesomeIcon icon={faDroplet} />
+                  <span>Humidity</span>
+                  <strong>{weatherData.humidity}%</strong>
+                </div>
+
+                <div className="info-tile detail-tile">
+                  <FontAwesomeIcon icon={faWind} />
+                  <span>Wind</span>
+                  <strong>{weatherData.wind} km/h</strong>
+                </div>
+
+                <div className="info-tile detail-tile">
+                  <FontAwesomeIcon icon={faGaugeHigh} />
+                  <span>Pressure</span>
+                  <strong>{weatherData.pressure} hPa</strong>
+                </div>
+              </div>
             </div>
 
-            <div className="weather-details">
-              <div className="temperature">
-                <WeatherIcon icon={weatherData.icon} size={150} />
+            <div className="dashboard-bottom-grid">
+              <div className="weather-panel globe-panel">
+                <h3>Select area</h3>
 
-                <Temperature celsius={weatherData.temperature} />
+                <div className="globe-placeholder">
+                  <span>GLOBE</span>
+                </div>
+
+                <div className="selected-city">{weatherData.city}</div>
               </div>
 
-              <div className="additional-info">
-                <p>Humidity: {weatherData.humidity}%</p>
-                <p>Wind: {weatherData.wind} km/h</p>
+              <div className="weather-panel forecast-panel">
+                <h3>
+                  <FontAwesomeIcon icon={faCalendarDays} />6 - DAY FORECAST
+                </h3>
+
+                <Forecast
+                  forecast={weatherData.forecast}
+                  timeZone={weatherData.timeZone}
+                />
               </div>
             </div>
           </div>

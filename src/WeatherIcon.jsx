@@ -51,7 +51,7 @@ const weatherIcons = {
   "mist-night": fogNight,
 };
 
-export default function WeatherIcon({ icon, size = 120 }) {
+export default function WeatherIcon({ icon, size = 180 }) {
   const iconSrc = weatherIcons[icon] || cloudy;
 
   return (
