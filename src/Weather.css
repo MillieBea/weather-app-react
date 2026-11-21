@@ -411,8 +411,33 @@
   font-size: 16px;
 }
 
+.globe-panel .selected-city {
+  flex-shrink: 0;
+  margin-top: 10px;
+}
+
+.globe-panel h3 {
+  text-align: center;
+  font-size: 18px;
+}
+
+.globe-subtitle {
+  color: #c9d9dc;
+  font-size: 13px;
+  text-align: center;
+  margin: -5px 0 5px;
+}
+
+.forecast-panel h3 {
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
 .forecast-panel {
   min-height: 390px;
+  display: flex;
+  flex-direction: column;
   text-align: left;
 }
 

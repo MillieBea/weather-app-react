@@ -1,7 +1,7 @@
 import WeatherIcon from "./WeatherIcon";
 import "./Forecast.css";
 
-export default function Forecast({ forecast, timeZone }) {
+export default function Forecast({ forecast, timeZone, city }) {
   const days = forecast.slice(1, 7);
 
   return (

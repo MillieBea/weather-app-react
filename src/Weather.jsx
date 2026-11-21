@@ -6,6 +6,7 @@ import WeatherIcon from "./WeatherIcon";
 import Forecast from "./Forecast";
 import Temperature from "./Temperature";
 import LocalClock from "./LocalClock";
+import Globe from "./Globe";
 import "./Weather.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -23,13 +24,15 @@ import {
 export default function Weather() {
   const [city, setCity] = useState("London");
 
+  const [globePaused, setGlobePaused] = useState(false);
+
   const [weatherData, setWeatherData] = useState({
     ready: false,
     loading: false,
     error: null,
   });
 
-  const searchWeather = useCallback((cityName) => {
+  const searchWeather = useCallback((cityName, pauseGlobe = false) => {
     setWeatherData((previousData) => ({
       ...previousData,
       loading: true,
@@ -60,6 +63,8 @@ export default function Weather() {
             error: null,
             city: data.city,
             country: data.country,
+            latitude: data.coordinates.latitude,
+            longitude: data.coordinates.longitude,
             date: new Date(data.time * 1000),
             timeZone: timezoneResponse.data.zone,
             temperature: data.temperature.current,
@@ -71,6 +76,9 @@ export default function Weather() {
             wind: data.wind.speed,
             forecast: forecastData.daily,
           });
+          if (pauseGlobe) {
+            setGlobePaused(true);
+          }
         });
       })
       .catch((error) => {
@@ -87,13 +95,49 @@ export default function Weather() {
       });
   }, []);
 
+  const handleGlobeLocationSelect = useCallback(
+    ({ latitude, longitude }) => {
+      const reverseGeocodeUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
+
+      axios
+        .get(reverseGeocodeUrl)
+        .then((response) => {
+          const data = response.data;
+
+          const place = data.city || data.locality || data.principalSubdivision;
+
+          const country = data.countryName;
+
+          if (!place) {
+            throw new Error("Could not identify this location.");
+          }
+
+          const locationQuery = country ? `${place}, ${country}` : place;
+
+          setCity(place);
+          searchWeather(locationQuery);
+        })
+        .catch((error) => {
+          console.error("Location lookup error:", error);
+
+          setWeatherData((previousData) => ({
+            ...previousData,
+            loading: false,
+            error:
+              "Sorry, we couldn't identify that location. Please try another spot.",
+          }));
+        });
+    },
+    [searchWeather],
+  );
+
   useEffect(() => {
-    searchWeather("London");
+    searchWeather("London", true);
   }, [searchWeather]);
 
   function handleSubmit(event) {
     event.preventDefault();
-    searchWeather(city);
+    searchWeather(city, true);
   }
   function handleLocationClick() {
     if (!navigator.geolocation) {
@@ -288,23 +332,30 @@ export default function Weather() {
 
             <div className="dashboard-bottom-grid">
               <div className="weather-panel globe-panel">
-                <h3>Select area</h3>
+                <h3>{weatherData.city} on the map</h3>
 
-                <div className="globe-placeholder">
-                  <span>GLOBE</span>
-                </div>
+                <p className="globe-subtitle">
+                  Explore the globe or choose another location.
+                </p>
 
-                <div className="selected-city">{weatherData.city}</div>
+                <Globe
+                  onLocationSelect={handleGlobeLocationSelect}
+                  selectedLatitude={weatherData.latitude}
+                  selectedLongitude={weatherData.longitude}
+                  rotationPaused={globePaused}
+                />
               </div>
 
               <div className="weather-panel forecast-panel">
                 <h3>
-                  <FontAwesomeIcon icon={faCalendarDays} />6 - DAY FORECAST
+                  <FontAwesomeIcon icon={faCalendarDays} />6 - day forecast for{" "}
+                  {weatherData.city}
                 </h3>
 
                 <Forecast
                   forecast={weatherData.forecast}
                   timeZone={weatherData.timeZone}
+                  city={weatherData.city}
                 />
               </div>
             </div>

@@ -13,11 +13,14 @@
     "@fortawesome/free-solid-svg-icons": "^7.3.1",
     "@fortawesome/react-fontawesome": "^3.5.0",
     "@meteocons/svg": "^0.1.0",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
     "axios": "^1.21.1",
     "bootstrap": "^5.3.9",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-spinners": "^0.17.1"
+    "react-spinners": "^0.17.1",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
