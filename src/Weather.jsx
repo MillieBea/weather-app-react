@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import FormattedDate from "./FormattedDate";
-import { PuffLoader } from "react-spinners";
 import WeatherIcon from "./WeatherIcon";
 import Forecast from "./Forecast";
 import Temperature from "./Temperature";
@@ -19,9 +18,10 @@ import {
   faMagnifyingGlass,
   faLocationCrosshairs,
   faCalendarDays,
+  faCloudSun,
 } from "@fortawesome/free-solid-svg-icons";
 
-export default function Weather() {
+export default function Weather({ onCityChange, onWeatherChange }) {
   const [city, setCity] = useState("London");
 
   const [globePaused, setGlobePaused] = useState(false);
@@ -32,68 +32,75 @@ export default function Weather() {
     error: null,
   });
 
-  const searchWeather = useCallback((cityName, pauseGlobe = false) => {
-    setWeatherData((previousData) => ({
-      ...previousData,
-      loading: true,
-      error: null,
-    }));
+  const searchWeather = useCallback(
+    (cityName, pauseGlobe = false) => {
+      setWeatherData((previousData) => ({
+        ...previousData,
+        loading: true,
+        error: null,
+      }));
 
-    const apiKey = import.meta.env.VITE_SHECODES_API_KEY;
+      const apiKey = import.meta.env.VITE_SHECODES_API_KEY;
 
-    const url = `https://api.shecodes.io/weather/v1/current?query=${encodeURIComponent(cityName)}&key=${apiKey}`;
+      const url = `https://api.shecodes.io/weather/v1/current?query=${encodeURIComponent(cityName)}&key=${apiKey}`;
 
-    const forecastUrl = `https://api.shecodes.io/weather/v1/forecast?query=${encodeURIComponent(cityName)}&key=${apiKey}`;
+      const forecastUrl = `https://api.shecodes.io/weather/v1/forecast?query=${encodeURIComponent(cityName)}&key=${apiKey}`;
 
-    axios
-      .all([axios.get(url), axios.get(forecastUrl)])
-      .then(([response, forecastResponse]) => {
-        const data = response.data;
-        const forecastData = forecastResponse.data;
+      axios
+        .all([axios.get(url), axios.get(forecastUrl)])
+        .then(([response, forecastResponse]) => {
+          const data = response.data;
+          const forecastData = forecastResponse.data;
 
-        console.log("Weather icon:", data.condition.icon);
-        console.log("Weather description:", data.condition.description);
+          console.log("Weather icon:", data.condition.icon);
+          console.log("Weather description:", data.condition.description);
 
-        const timezoneUrl = `https://hourora.app/api/v1/lookup?lat=${data.coordinates.latitude}&lng=${data.coordinates.longitude}`;
+          const timezoneUrl = `https://hourora.app/api/v1/lookup?lat=${data.coordinates.latitude}&lng=${data.coordinates.longitude}`;
 
-        return axios.get(timezoneUrl).then((timezoneResponse) => {
-          setWeatherData({
-            ready: true,
-            loading: false,
-            error: null,
-            city: data.city,
-            country: data.country,
-            latitude: data.coordinates.latitude,
-            longitude: data.coordinates.longitude,
-            date: new Date(data.time * 1000),
-            timeZone: timezoneResponse.data.zone,
-            temperature: data.temperature.current,
-            feelsLike: data.temperature.feels_like,
-            humidity: data.temperature.humidity,
-            pressure: data.temperature.pressure,
-            description: data.condition.description,
-            icon: data.condition.icon,
-            wind: data.wind.speed,
-            forecast: forecastData.daily,
+          return axios.get(timezoneUrl).then((timezoneResponse) => {
+            setCity(data.city);
+            onCityChange?.(data.city);
+
+            setWeatherData({
+              ready: true,
+              loading: false,
+              error: null,
+              city: data.city,
+              country: data.country,
+              latitude: data.coordinates.latitude,
+              longitude: data.coordinates.longitude,
+              date: new Date(data.time * 1000),
+              timeZone: timezoneResponse.data.zone,
+              temperature: data.temperature.current,
+              feelsLike: data.temperature.feels_like,
+              humidity: data.temperature.humidity,
+              pressure: data.temperature.pressure,
+              description: data.condition.description,
+              icon: data.condition.icon,
+              wind: data.wind.speed,
+              forecast: forecastData.daily,
+            });
+            onWeatherChange?.(data.condition.description);
+            if (pauseGlobe) {
+              setGlobePaused(true);
+            }
           });
-          if (pauseGlobe) {
-            setGlobePaused(true);
-          }
-        });
-      })
-      .catch((error) => {
-        console.error(
-          "Weather API error:",
-          error.response?.data || error.message,
-        );
+        })
+        .catch((error) => {
+          console.error(
+            "Weather API error:",
+            error.response?.data || error.message,
+          );
 
-        setWeatherData((previousData) => ({
-          ...previousData,
-          loading: false,
-          error: "Sorry, we couldn't find that city. Please try again.",
-        }));
-      });
-  }, []);
+          setWeatherData((previousData) => ({
+            ...previousData,
+            loading: false,
+            error: "Sorry, we couldn't find that city. Please try again.",
+          }));
+        });
+    },
+    [onCityChange, onWeatherChange],
+  );
 
   const handleGlobeLocationSelect = useCallback(
     ({ latitude, longitude }) => {
@@ -256,8 +263,21 @@ export default function Weather() {
         </form>
 
         {weatherData.loading && (
-          <div className="loader">
-            <PuffLoader color="#000000" size={60} speedMultiplier={0.7} />
+          <div className="loader" role="status" aria-live="polite">
+            <div className="loader-icon-wrap">
+              <FontAwesomeIcon
+                icon={faCloudSun}
+                className="loader-weather-icon"
+              />
+            </div>
+
+            <p className="loader-message">Gathering the forecast...</p>
+
+            <div className="loader-dots" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
           </div>
         )}
 

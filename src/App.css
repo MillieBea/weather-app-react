@@ -1,29 +1,109 @@
 .app-wrapper {
+  position: relative;
+  z-index: 1;
   width: 100%;
+  min-height: 100vh;
 }
 
 .footer {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 20px auto 18px;
+  padding: 8px 15px 5px;
   font-family: sans-serif;
   text-align: center;
-  margin: 0 auto 30px;
-  font-size: 14px;
-  color: #777777;
+  color: rgba(255, 255, 255, 0.75);
 }
 
-.footer a {
-  color: #222222;
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: -15px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 3px;
+}
+
+.footer-symbol {
+  color: #c8e2e8;
+  font-size: 17px;
+  text-shadow: 0 0 12px rgba(190, 220, 255, 0.55);
+}
+
+.footer-tagline {
+  margin: 0;
+  color: rgba(220, 232, 237, 0.7);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.footer-divider {
+  width: 90px;
+  height: 1px;
+  margin: 10px auto;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(220, 235, 240, 0.35),
+    transparent
+  );
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  font-size: 10px;
+  line-height: 1.5;
+  letter-spacing: 0.3px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.82);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition:
+    color 0.25s ease,
+    text-shadow 0.25s ease;
 }
 
-.footer a:hover {
-  color: #888888;
-  text-decoration: underline;
+.footer-links a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(210, 235, 255, 0.5);
 }
 
 .footer-separator {
-  font-size: 24px;
-  font-weight: 600;
-  margin: 0 8px;
-  vertical-align: middle;
+  color: rgba(190, 220, 230, 0.65);
+  font-size: 9px;
+}
+
+.footer-copyright {
+  margin: 7px 0 0;
+  font-size: 9px;
+  color: rgba(220, 232, 237, 0.45);
+  letter-spacing: 0.7px;
+}
+
+@media (max-width: 600px) {
+  .footer {
+    margin-top: 15px;
+    padding: 10px 12px 5px;
+  }
+
+  .footer-links {
+    gap: 5px;
+    line-height: 1.6;
+  }
 }

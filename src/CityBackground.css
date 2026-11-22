@@ -1,0 +1,95 @@
+.city-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.city-background-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  transform: scale(1);
+}
+
+.current-photo {
+  animation: cityFadeIn 1.6s ease forwards;
+}
+
+.previous-photo {
+  animation: cityFadeOut 1.6s ease forwards;
+}
+
+.current-photo,
+.previous-photo {
+  filter: brightness(0.78) contrast(1.25) saturate(1.18);
+}
+
+.city-background-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5, 10, 18, 0.12) 0%,
+      rgba(5, 10, 18, 0.3) 55%,
+      rgba(5, 10, 18, 0.48) 100%
+    ),
+    radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0.02) 35%,
+      rgba(0, 0, 0, 0.38) 100%
+    );
+}
+
+.photo-attribution {
+  position: absolute;
+  bottom: 12px;
+  right: 18px;
+  color: #eeeeee;
+  font-size: 11px;
+  font-family: sans-serif;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  pointer-events: auto;
+}
+
+.photo-attribution a {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.photo-attribution a:hover {
+  color: #c9d9dc;
+}
+
+@keyframes cityFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cityFadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .photo-attribution {
+    right: 10px;
+    bottom: 8px;
+    font-size: 10px;
+  }
+}

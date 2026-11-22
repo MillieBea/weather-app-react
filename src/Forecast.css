@@ -74,3 +74,40 @@
   color: #929ba3;
   font-size: 14px;
 }
+
+.forecast-day {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.13);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.forecast-day:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.2);
+}
+
+.forecast-weekday {
+  color: #ffffff;
+}
+
+.forecast-temperatures strong {
+  color: #ffffff;
+}
+
+.forecast-temperatures span {
+  color: #c5cbd0;
+}
+
+.forecast-day {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.forecast-day:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
