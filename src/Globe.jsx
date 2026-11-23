@@ -159,35 +159,45 @@ function Earth({
 
       {markerPosition && (
         <group position={markerPosition}>
-          <mesh>
-            <sphereGeometry args={[0.065, 32, 32]} />
-            <meshBasicMaterial
-              color="#FFFDF5"
-              transparent
-              opacity={0.24}
-              toneMapped={false}
-              depthWrite={false}
-            />
-          </mesh>
-
           <group
             quaternion={new Quaternion().setFromUnitVectors(
               new Vector3(0, 0, 1),
               markerPosition.clone().normalize(),
             )}
           >
-            <mesh position={[0, 0, 0.025]} renderOrder={2}>
+            <mesh position={[0, 0, 0.02]} scale={1.28} renderOrder={2}>
               <shapeGeometry args={[locationPinShape]} />
               <meshBasicMaterial
-                color="#e3e2de"
+                color="#9edaff"
+                transparent
+                opacity={0.42}
+                side={DoubleSide}
+                toneMapped={false}
+                depthWrite={false}
+              />
+            </mesh>
+
+            <mesh position={[0, 0, 0.023]} scale={1.1} renderOrder={3}>
+              <shapeGeometry args={[locationPinShape]} />
+              <meshBasicMaterial
+                color="#edf7ff"
                 side={DoubleSide}
                 toneMapped={false}
               />
             </mesh>
 
-            <mesh position={[0, 0.027, 0.027]} renderOrder={3}>
-              <circleGeometry args={[0.012, 24]} />
-              <meshBasicMaterial color="#FFFFFF" toneMapped={false} />
+            <mesh position={[0, 0, 0.026]} renderOrder={4}>
+              <shapeGeometry args={[locationPinShape]} />
+              <meshBasicMaterial
+                color="#17283f"
+                side={DoubleSide}
+                toneMapped={false}
+              />
+            </mesh>
+
+            <mesh position={[0, 0.027, 0.03]} renderOrder={5}>
+              <circleGeometry args={[0.012, 32]} />
+              <meshBasicMaterial color="#ffffff" toneMapped={false} />
             </mesh>
           </group>
         </group>
