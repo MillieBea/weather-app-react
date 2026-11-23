@@ -99,3 +99,35 @@
   background: rgba(255, 255, 255, 0.3);
   border-color: rgba(255, 255, 255, 0.5);
 }
+
+@media (min-width: 601px) and (max-width: 767px) {
+  .globe-canvas {
+    height: 240px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .globe-canvas canvas {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: scale(0.75);
+    transform-origin: center center;
+  }
+
+  .globe-container {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 345px) {
+  .globe-canvas {
+    height: 220px;
+  }
+
+  .globe-container {
+    gap: 8px;
+  }
+}
