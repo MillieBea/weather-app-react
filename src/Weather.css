@@ -759,6 +759,10 @@
   .forecast-icon {
     transform: scale(0.8);
   }
+  .forecast-temperatures strong,
+  .forecast-temperatures span {
+    font-size: 8px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -897,6 +901,10 @@
 
   .forecast-icon {
     transform: scale(0.7);
+  }
+  .forecast-temperatures strong,
+  .forecast-temperatures span {
+    font-size: 8px;
   }
 }
 
